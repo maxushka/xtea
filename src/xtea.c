@@ -1,6 +1,6 @@
 #include "xtea.h"
 
-static void encipher(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
+static void encode(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
 {
   unsigned int i;
   uint32_t v0 = v[0], v1 = v[1], sum = 0, delta = 0x9E3779B9;
@@ -14,7 +14,7 @@ static void encipher(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
   v[1] = v1;
 }
 
-static void decipher(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
+static void decode(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
 {
   unsigned int i;
   uint32_t v0 = v[0], v1 = v[1], delta = 0x9E3779B9, sum = delta * num_rounds;
@@ -28,7 +28,7 @@ static void decipher(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
   v[1] = v1;
 }
 
-char *encrypt(uint8_t *data, uint8_t *key)
+char *xtea_encrypt(uint8_t *data, uint8_t const *key)
 {
   uint32_t len = strlen(data);
   if ((len%8)>0)
@@ -40,13 +40,13 @@ char *encrypt(uint8_t *data, uint8_t *key)
   for (int i = 0; i < strlen(data); i+=8)
   {
     memcpy(enc, data+i, 8);
-    encipher(32, enc, (uint32_t const*)key);
+    encode(32, enc, (uint32_t const*)key);
     memcpy(out+i, enc, 8);
   }
   return out;
 }
 
-char *decrypt(uint8_t *data, uint8_t *key, uint32_t len)
+char *xtea_decrypt(uint8_t *data, uint8_t const *key, uint32_t len)
 {
   if ((len%8) > 0)
   {
@@ -57,7 +57,7 @@ char *decrypt(uint8_t *data, uint8_t *key, uint32_t len)
   for (int i = 0; i < len; i+=8)
   {
     memcpy(dec, data+i, 8);
-    decipher(32, dec, (uint32_t const*)key);
+    decode(32, dec, (uint32_t const*)key);
     memcpy(out+i, dec, 8);
   }
   return out;

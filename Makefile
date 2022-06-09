@@ -1,2 +1,2 @@
 all:
-	gcc app.c xtea.c -o xtea
+	gcc app.c src/xtea.c -o xtea -I src
