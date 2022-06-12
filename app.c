@@ -7,13 +7,15 @@ const uint8_t key[] = {0x54, 0x49, 0x31, 0x38, 0x32, 0x34, 0x33, 0x35,
 void encode_file(FILE *fi, FILE *fo)
 {
   char *line = malloc(8);
+
   if (line)
   {
     while (fread(line, 1, 8, fi) != 0)
     {
-      char *out = xtea_encrypt(line, key);
+      char *out = xtea_encrypt(line, key, 8);
       fwrite(out, 1, 8, fo);
       free(out);
+      memset(line, 0xff, 8);
     }
     free(line);
   }
@@ -22,6 +24,8 @@ void encode_file(FILE *fi, FILE *fo)
 void decode_file(FILE *fi, FILE *fo)
 {
   char *line = malloc(8);
+  uint32_t len = 0, count = 0;
+
   if (line)
   {
     while (fread(line, 1, 8, fi) != 0)
@@ -65,8 +69,8 @@ int main(int argc, char const *argv[])
     exit(0);
   }
 
-  FILE *in_file = fopen(argv[2], "r");
-  FILE *out_file = fopen(argv[3], "w");
+  FILE *in_file = fopen(argv[2], "rb");
+  FILE *out_file = fopen(argv[3], "wb");
   if (in_file == NULL || out_file == NULL)
   {
     printf("Error! Could not open file\n");

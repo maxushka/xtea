@@ -28,16 +28,16 @@ static void decode(uint32_t num_rounds, uint32_t v[2], uint32_t const key[4])
   v[1] = v1;
 }
 
-char *xtea_encrypt(uint8_t *data, uint8_t const *key)
+char *xtea_encrypt(uint8_t *data, uint8_t const *key, uint32_t len)
 {
-  uint32_t len = strlen(data);
-  if ((len%8)>0)
-  {
-    len += len%8;
-  }
-  char *out = malloc(len);
   uint32_t enc[2] = {0};
-  for (int i = 0; i < strlen(data); i+=8)
+  if ((len%8)>0)
+    len += 8-len%8;
+
+  char *out = malloc(len);
+  memset(out, 0, len);
+
+  for (int i = 0; i < len; i+=8)
   {
     memcpy(enc, data+i, 8);
     encode(32, enc, (uint32_t const*)key);
@@ -49,9 +49,8 @@ char *xtea_encrypt(uint8_t *data, uint8_t const *key)
 char *xtea_decrypt(uint8_t *data, uint8_t const *key, uint32_t len)
 {
   if ((len%8) > 0)
-  {
     len += 8-len%8;
-  }
+
   char *out = malloc(len);
   uint32_t dec[2] = {0};
   for (int i = 0; i < len; i+=8)
